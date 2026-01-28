@@ -2,15 +2,26 @@
 # USAGE EXAMPLES
 # ============================================================================
 
+import sys
+import os
+# Get the absolute path of the directory you want to import from
+# This example goes up one directory level, then into 'src/image_toolkit'
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+module_dir = os.path.join(parent_dir, 'src/image_toolkit')
+
+# Insert the directory to the beginning of the search path
+sys.path.insert(0, module_dir)
+
 import numpy as np
 from typing import Callable, Tuple, Optional
-import pixel_level_image_gen as img_gen
+import generator as Gen
 
 def example_1_direct_pixel_assignment():
     """Example 1: Create a simple gradient using direct pixel assignment."""
     print("\n=== Example 1: Direct Pixel Assignment (Gradient) ===")
 
-    gen = img_gen.ImageGenerator(256, 256)
+    gen = Gen.ImageGenerator(256, 256)
 
     # Create a horizontal and vertical gradient
     for x in range(gen.width):
@@ -30,7 +41,7 @@ def example_2_direct_byte_assignment():
     """Example 2: Create a pattern using direct byte assignment."""
     print("\n=== Example 2: Direct Byte Assignment (Incresing function) ===")
 
-    gen = img_gen.ImageGenerator(256, 256)
+    gen = Gen.ImageGenerator(256, 256)
 
     # Assigning each byte the value of its index
     for i in range(gen.byte_count):
@@ -43,7 +54,7 @@ def example_3_recursive_pixel_assignment():
     """Example 3: Create a pattern where each pixel depends on its neighbors."""
     print("\n=== Example 3: Recursive Pixel Assignment (Neighbor Average) ===")
 
-    gen = img_gen.ImageGenerator(256, 256)
+    gen = Gen.ImageGenerator(256, 256)
     div = 63
 
     # Set a bright pixel in the center as a seed
@@ -92,7 +103,7 @@ def example_4_recursive_byte_assignment():
     """Example 4: Create a pattern where each byte depends on previous bytes."""
     print("\n=== Example 4: Recursive Byte Assignment (XOR Pattern) ===")
 
-    gen = img_gen.ImageGenerator(256, 256)
+    gen = Gen.ImageGenerator(256, 256)
 
     # Define a function that creates an XOR-based pattern
     def xor_pattern(idx: int, flat: np.ndarray) -> int:
@@ -116,7 +127,7 @@ def example_5_complex_fractal():
     """Example 5: Create a simple Sierpinski-like triangle pattern."""
     print("\n=== Example 5: Complex Pattern (Sierpinski-style) ===")
 
-    gen = img_gen.ImageGenerator(512, 512)
+    gen = Gen.ImageGenerator(512, 512)
 
     for x in range(gen.width):
         for y in range(gen.height):

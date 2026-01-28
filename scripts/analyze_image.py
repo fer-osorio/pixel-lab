@@ -2,6 +2,25 @@
 # Command-Line Interface
 # ============================================================================
 
+import sys
+import os
+# Get the absolute path of the directory you want to import from
+# This example goes up one directory level, then into 'src/image_toolkit'
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+module_dir = os.path.join(parent_dir, 'src/image_toolkit')
+
+# Insert the directory to the beginning of the search path
+sys.path.insert(0, module_dir)
+
+# argparse: Command-line argument parsing for CLI interface
+import argparse
+
+# sys: System-specific parameters (stderr, exit codes) for CLI error handling
+import sys
+
+import metrics as Metrics
+
 def main():
     """
     CLI entry point for analyzing images from the command line.
@@ -70,16 +89,16 @@ Metric options: entropy, chi_square, correlation, mad, monte_carlo, all
 
     # Map string argument to enum
     channel_map = {
-        'all': ImageMetrics.RGB.ALL,
-        'red': ImageMetrics.RGB.RED,
-        'green': ImageMetrics.RGB.GREEN,
-        'blue': ImageMetrics.RGB.BLUE
+        'all': Metrics.ImageMetrics.RGB.ALL,
+        'red': Metrics.ImageMetrics.RGB.RED,
+        'green': Metrics.ImageMetrics.RGB.GREEN,
+        'blue': Metrics.ImageMetrics.RGB.BLUE
     }
     channel = channel_map[args.channel]
 
     try:
         # Load image
-        metrics = ImageMetrics(args.image)
+        metrics = Metrics.ImageMetrics(args.image)
 
         # Determine which metrics to show
         show_all = 'all' in args.metrics
@@ -160,17 +179,17 @@ Image Metrics Analyzer - Usage Examples
 
 PROGRAMMATIC USAGE:
 -------------------
-from image_metrics import ImageMetrics
+from image_metrics import Metrics.ImageMetrics
 
 # Load and analyze an image
-metrics = ImageMetrics("generated_image.png")
+metrics = Metrics.ImageMetrics("generated_image.png")
 
 # Compute individual metrics
-entropy = metrics.entropy(ImageMetrics.RGB.ALL)
-chi2 = metrics.chi_square(ImageMetrics.RGB.RED)
-corr = metrics.correlation(ImageMetrics.RGB.ALL, 'horizontal')
-mad = metrics.mean_absolute_deviation(ImageMetrics.RGB.ALL)
-mc_pi = metrics.monte_carlo_pi(ImageMetrics.RGB.ALL)
+entropy = metrics.entropy(Metrics.ImageMetrics.RGB.ALL)
+chi2 = metrics.chi_square(Metrics.ImageMetrics.RGB.RED)
+corr = metrics.correlation(Metrics.ImageMetrics.RGB.ALL, 'horizontal')
+mad = metrics.mean_absolute_deviation(Metrics.ImageMetrics.RGB.ALL)
+mc_pi = metrics.monte_carlo_pi(Metrics.ImageMetrics.RGB.ALL)
 
 print(f"Entropy: {entropy:.4f} bits")
 print(f"Chi-square p-value: {chi2['p_value']:.6f}")
@@ -190,18 +209,18 @@ if good_random:
     print("✓ Image passes randomness tests")
 
 # Get comprehensive analysis
-analysis = metrics.analyze_all(ImageMetrics.RGB.ALL)
+analysis = metrics.analyze_all(Metrics.ImageMetrics.RGB.ALL)
 
 # Print formatted summary
-print(metrics.summary(ImageMetrics.RGB.GREEN, verbose=True))
+print(metrics.summary(Metrics.ImageMetrics.RGB.GREEN, verbose=True))
 
 # Generate visualizations
-metrics.plot_frequency_distribution(ImageMetrics.RGB.ALL)
-metrics.plot_correlation_heatmap(ImageMetrics.RGB.ALL)
-metrics.plot_monte_carlo_visualization(ImageMetrics.RGB.ALL)
+metrics.plot_frequency_distribution(Metrics.ImageMetrics.RGB.ALL)
+metrics.plot_correlation_heatmap(Metrics.ImageMetrics.RGB.ALL)
+metrics.plot_monte_carlo_visualization(Metrics.ImageMetrics.RGB.ALL)
 
 # Or generate all plots at once
-metrics.plot_all(ImageMetrics.RGB.ALL, save_dir='./output')
+metrics.plot_all(Metrics.ImageMetrics.RGB.ALL, save_dir='./output')
 
 COMMAND-LINE USAGE:
 -------------------
@@ -234,9 +253,9 @@ for i in range(gen.byte_count):
 gen.save("random_test.png")
 
 # Analyze and visualize
-metrics = ImageMetrics("random_test.png")
-print(metrics.summary(ImageMetrics.RGB.ALL, verbose=True))
-metrics.plot_all(ImageMetrics.RGB.ALL, save_dir='./test_results')
+metrics = Metrics.ImageMetrics("random_test.png")
+print(metrics.summary(Metrics.ImageMetrics.RGB.ALL, verbose=True))
+metrics.plot_all(Metrics.ImageMetrics.RGB.ALL, save_dir='./test_results')
 
 # Expected results for good PRNG:
 # - Entropy: > 7.9 bits

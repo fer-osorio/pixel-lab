@@ -23,12 +23,6 @@ from enum import Enum
 # typing: Type hints for better code documentation and IDE support
 from typing import Dict, Tuple, Optional
 
-# argparse: Command-line argument parsing for CLI interface
-import argparse
-
-# sys: System-specific parameters (stderr, exit codes) for CLI error handling
-import sys
-
 # scipy.stats: Statistical functions - chi-square test with p-value calculation
 from scipy import stats
 
