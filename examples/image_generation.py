@@ -126,13 +126,9 @@ def example_4_recursive_byte_assignment():
 def example_5_complex_fractal():
     """Example 5: Create a simple Sierpinski-like triangle pattern."""
     print("\n=== Example 5: Complex Pattern (Sierpinski-style) ===")
-
-    gen = Gen.ImageGenerator(512, 512)
-
-    for x in range(gen.width):
-        for y in range(gen.height):
-            # Red and green increases with x and y, blue stay at 63
-            gen.set_pixel(x, y, x & 255, y & 255, 63)
+    sz = 512
+    szdiv = (sz + 255) // 256;
+    gen = Gen.ImageGenerator(sz, sz)
 
     # Define a rule based on bitwise operations on coordinates
     def sierpinski_rule(x: int, y: int, img: np.ndarray) -> Tuple[int, int, int]:
@@ -140,15 +136,12 @@ def example_5_complex_fractal():
         if (x & y) == 0:
             return (255, 255, 255)  # White
         else:
-            return img[x,y]
+            return (x // szdiv, y // szdiv, 255) # Cool background
 
     # Generate the pattern
     for y in range(gen.height):
         for x in range(gen.width):
             gen.set_pixel_recursive(x, y, sierpinski_rule)
-            if x < 256 and y < 256:
-                px = gen.get_pixel(x,y)
-                gen.set_pixel(x + 256, y + 256, px[0], px[1], px[2])
 
     gen.save("example5_sierpinski.png")
 
