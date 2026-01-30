@@ -2,24 +2,13 @@
 # Command-Line Interface
 # ============================================================================
 
-import sys
-import os
-# Get the absolute path of the directory you want to import from
-# This example goes up one directory level, then into 'src/image_toolkit'
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-module_dir = os.path.join(parent_dir, 'src/image_toolkit')
-
-# Insert the directory to the beginning of the search path
-sys.path.insert(0, module_dir)
-
 # argparse: Command-line argument parsing for CLI interface
 import argparse
 
 # sys: System-specific parameters (stderr, exit codes) for CLI error handling
 import sys
 
-import metrics as Metrics
+from image_toolkit import ImageMetrics
 
 def main():
     """
@@ -89,16 +78,16 @@ Metric options: entropy, chi_square, correlation, mad, monte_carlo, all
 
     # Map string argument to enum
     channel_map = {
-        'all': Metrics.ImageMetrics.RGB.ALL,
-        'red': Metrics.ImageMetrics.RGB.RED,
-        'green': Metrics.ImageMetrics.RGB.GREEN,
-        'blue': Metrics.ImageMetrics.RGB.BLUE
+        'all': ImageMetrics.RGB.ALL,
+        'red': ImageMetrics.RGB.RED,
+        'green': ImageMetrics.RGB.GREEN,
+        'blue': ImageMetrics.RGB.BLUE
     }
     channel = channel_map[args.channel]
 
     try:
         # Load image
-        metrics = Metrics.ImageMetrics(args.image)
+        metrics = ImageMetrics(args.image)
 
         # Determine which metrics to show
         show_all = 'all' in args.metrics
@@ -175,56 +164,9 @@ if __name__ == "__main__":
     else:
         # Otherwise, show usage examples
         print("""
-Image Metrics Analyzer - Usage Examples
-
-PROGRAMMATIC USAGE:
--------------------
-from image_metrics import Metrics.ImageMetrics
-
-# Load and analyze an image
-metrics = Metrics.ImageMetrics("generated_image.png")
-
-# Compute individual metrics
-entropy = metrics.entropy(Metrics.ImageMetrics.RGB.ALL)
-chi2 = metrics.chi_square(Metrics.ImageMetrics.RGB.RED)
-corr = metrics.correlation(Metrics.ImageMetrics.RGB.ALL, 'horizontal')
-mad = metrics.mean_absolute_deviation(Metrics.ImageMetrics.RGB.ALL)
-mc_pi = metrics.monte_carlo_pi(Metrics.ImageMetrics.RGB.ALL)
-
-print(f"Entropy: {entropy:.4f} bits")
-print(f"Chi-square p-value: {chi2['p_value']:.6f}")
-print(f"Correlation: {corr:+.4f}")
-print(f"MAD: {mad['mad_percentage']:.2f}%")
-print(f"π estimate: {mc_pi['pi_estimate']:.6f}")
-
-# Test randomness of generated image
-good_random = (
-    entropy > 7.9 and
-    chi2['p_value'] > 0.05 and
-    abs(corr) < 0.1 and
-    mad['mad_percentage'] < 10.0 and
-    mc_pi['error_percentage'] < 5.0
-)
-if good_random:
-    print("✓ Image passes randomness tests")
-
-# Get comprehensive analysis
-analysis = metrics.analyze_all(Metrics.ImageMetrics.RGB.ALL)
-
-# Print formatted summary
-print(metrics.summary(Metrics.ImageMetrics.RGB.GREEN, verbose=True))
-
-# Generate visualizations
-metrics.plot_frequency_distribution(Metrics.ImageMetrics.RGB.ALL)
-metrics.plot_correlation_heatmap(Metrics.ImageMetrics.RGB.ALL)
-metrics.plot_monte_carlo_visualization(Metrics.ImageMetrics.RGB.ALL)
-
-# Or generate all plots at once
-metrics.plot_all(Metrics.ImageMetrics.RGB.ALL, save_dir='./output')
-
 COMMAND-LINE USAGE:
 -------------------
-python image_metrics.py <image_file> [options]
+python analyze_image.py <image_file> [options]
 
 Options:
   --channel, -c   : Specify channel (all, red, green, blue)
@@ -234,33 +176,9 @@ Options:
   --save-plots, -s: Save plots to directory instead of displaying
 
 Examples:
-  python image_metrics.py image.png
-  python image_metrics.py image.png --channel red --verbose
-  python image_metrics.py image.png -m entropy mad monte_carlo
-  python image_metrics.py image.png --plot
-  python image_metrics.py image.png --save-plots ./analysis_output
-
-TESTING YOUR IMAGE GENERATOR:
------------------------------
-# Generate test image
-from pixel_image_gen import ImageGenerator
-import numpy as np
-
-gen = ImageGenerator(512, 512)
-# Fill with PRNG
-for i in range(gen.byte_count):
-    gen.set_byte(i, np.random.randint(0, 256))
-gen.save("random_test.png")
-
-# Analyze and visualize
-metrics = Metrics.ImageMetrics("random_test.png")
-print(metrics.summary(Metrics.ImageMetrics.RGB.ALL, verbose=True))
-metrics.plot_all(Metrics.ImageMetrics.RGB.ALL, save_dir='./test_results')
-
-# Expected results for good PRNG:
-# - Entropy: > 7.9 bits
-# - Chi-square p-value: > 0.05
-# - Correlations: < 0.1
-# - MAD: < 10%
-# - Monte Carlo π error: < 5%
+  python analyze_image.py image.png
+  python analyze_image.py image.png --channel red --verbose
+  python analyze_image.py image.png -m entropy mad monte_carlo
+  python analyze_image.py image.png --plot
+  python analyze_image.py image.png --save-plots ./analysis_output
         """)
