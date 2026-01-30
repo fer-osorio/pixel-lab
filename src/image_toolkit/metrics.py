@@ -9,6 +9,77 @@ Design decisions:
 3. Use NumPy for efficient computation
 4. Provide both programmatic API and CLI interface
 5. Return detailed results with statistical interpretation
+
+Image Metrics Analyzer - Usage Examples
+
+PROGRAMMATIC USAGE:
+-------------------
+from image_toolkit import ImageMetrics
+
+# Load and analyze an image
+metrics = ImageMetrics("generated_image.png")
+
+# Compute individual metrics
+entropy = metrics.entropy(ImageMetrics.RGB.ALL)
+chi2 = metrics.chi_square(ImageMetrics.RGB.RED)
+corr = metrics.correlation(ImageMetrics.RGB.ALL, 'horizontal')
+mad = metrics.mean_absolute_deviation(ImageMetrics.RGB.ALL)
+mc_pi = metrics.monte_carlo_pi(ImageMetrics.RGB.ALL)
+
+print(f"Entropy: {entropy:.4f} bits")
+print(f"Chi-square p-value: {chi2['p_value']:.6f}")
+print(f"Correlation: {corr:+.4f}")
+print(f"MAD: {mad['mad_percentage']:.2f}%")
+print(f"π estimate: {mc_pi['pi_estimate']:.6f}")
+
+# Test randomness of generated image
+good_random = (
+    entropy > 7.9 and
+    chi2['p_value'] > 0.05 and
+    abs(corr) < 0.1 and
+    mad['mad_percentage'] < 10.0 and
+    mc_pi['error_percentage'] < 5.0
+)
+if good_random:
+    print("✓ Image passes randomness tests")
+
+# Get comprehensive analysis
+analysis = metrics.analyze_all(ImageMetrics.RGB.ALL)
+
+# Print formatted summary
+print(metrics.summary(ImageMetrics.RGB.GREEN, verbose=True))
+
+# Generate visualizations
+metrics.plot_frequency_distribution(ImageMetrics.RGB.ALL)
+metrics.plot_correlation_heatmap(ImageMetrics.RGB.ALL)
+metrics.plot_monte_carlo_visualization(ImageMetrics.RGB.ALL)
+
+# Or generate all plots at once
+metrics.plot_all(ImageMetrics.RGB.ALL, save_dir='./output')
+
+TESTING YOUR IMAGE GENERATOR:
+-----------------------------
+# Generate test image
+from image_toolkit import ImageGenerator
+import numpy as np
+
+gen = ImageGenerator(512, 512)
+# Fill with PRNG
+for i in range(gen.byte_count):
+    gen.set_byte(i, np.random.randint(0, 256))
+gen.save("random_test.png")
+
+# Analyze and visualize
+metrics = ImageMetrics("random_test.png")
+print(metrics.summary(ImageMetrics.RGB.ALL, verbose=True))
+metrics.plot_all(ImageMetrics.RGB.ALL, save_dir='./test_results')
+
+# Expected results for good PRNG:
+# - Entropy: > 7.9 bits
+# - Chi-square p-value: > 0.05
+# - Correlations: < 0.1
+# - MAD: < 10%
+# - Monte Carlo π error: < 5%
 """
 
 # NumPy: Core numerical computing - efficient array operations and statistical functions
