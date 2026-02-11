@@ -1,7 +1,7 @@
 # HPPixelLab
 
 ## Project Overview
-HPPixelLab is a powerful library designed for generating and manipulating images efficiently. It provides an intuitive interface for common image processing tasks, harnessing the capabilities of modern computing.
+HPPixelLab is a library designed for generating and manipulating images efficiently and with high precision. The name "HPPixelLab" stands for "High Precision Pixel Laboratory".
 
 ## Features
 - Image generation from scratch.
@@ -24,29 +24,27 @@ pip install -r requirements.txt
 ```python
 from image_generator import ImageGenerator
 
-generator = ImageGenerator()
-image = generator.create_image(width=256, height=256, color='blue')
-image.show()
+gen = ImageGenerator(256, 256)
+# Assigning each byte the value of its index module 256
+for i in range(gen.byte_count):
+  gen.set_byte(i, i & 255)
+
+gen.save("direct_byte_assignment.png")
 ```
 
 ### Calculating Image Metrics
 ```python
 from image_metrics import ImageMetrics
 
-metrics = ImageMetrics(image)
-size = metrics.get_size()
-print(f'Image Size: {size}')
+metrics = ImageMetrics("image.png")
+entropy_blue = metrics.entropy("blue")
+print(f'Image entropy in blue channel: {entropy_blue}')
 ```
 
-## API Reference
+# Requirements
 
-### ImageGenerator Class
-- **Methods**
-  - `create_image(width: int, height: int, color: str)`: Generates an image with the specified width, height, and background color.
-
-### ImageMetrics Class
-- **Methods**
-  - `get_size()`: Returns the dimensions of the image.
-  - `get_average_color()`: Calculates the average color of the image.
-
-For more detailed information, please refer to the individual class documentation.
+- Python 3.x
+- numpy >= 1.20.0
+- pillow >= 9.0.0
+- scipy >= 1.7.0
+- matplotlib >= 3.4.0
