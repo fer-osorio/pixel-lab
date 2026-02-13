@@ -10,9 +10,10 @@ Design decisions:
 5. Support for both functional and method-based workflows
 """
 
+from typing import Callable, Tuple
+
 import numpy as np
 from PIL import Image
-from typing import Callable, Tuple, Optional
 
 
 class ImageGenerator:
@@ -120,7 +121,9 @@ class ImageGenerator:
         [R0, G0, B0, R1, G1, B1, ...] where 0, 1, etc. are pixel indices.
         """
         if not (0 <= byte_index < self.byte_count):
-            raise IndexError(f"Byte index {byte_index} out of bounds (max: {self.byte_count - 1})")
+            raise IndexError(
+                f"Byte index {byte_index} out of bounds (max: {self.byte_count - 1})"
+            )
 
         if not (0 <= value <= 255):
             raise ValueError("Byte value must be in range 0-255")
@@ -138,7 +141,9 @@ class ImageGenerator:
             Byte value (0-255)
         """
         if not (0 <= byte_index < self.byte_count):
-            raise IndexError(f"Byte index {byte_index} out of bounds (max: {self.byte_count - 1})")
+            raise IndexError(
+                f"Byte index {byte_index} out of bounds (max: {self.byte_count - 1})"
+            )
 
         flat_view = self.image.reshape(-1)
         return int(flat_view[byte_index])
@@ -147,8 +152,12 @@ class ImageGenerator:
     # METHOD 3: Recursive Pixel Assignment by Coordinates
     # ========================================================================
 
-    def set_pixel_recursive(self, x: int, y: int,
-                           func: Callable[[int, int, np.ndarray], Tuple[int, int, int]]) -> None:
+    def set_pixel_recursive(
+        self,
+        x: int,
+        y: int,
+        func: Callable[[int, int, np.ndarray], Tuple[int, int, int]],
+    ) -> None:
         """
         Set a pixel using a function that can reference other pixels (matrix view).
 
@@ -186,8 +195,9 @@ class ImageGenerator:
     # METHOD 4: Recursive Byte Assignment by Index
     # ========================================================================
 
-    def set_byte_recursive(self, byte_index: int,
-                          func: Callable[[int, np.ndarray], int]) -> None:
+    def set_byte_recursive(
+        self, byte_index: int, func: Callable[[int, np.ndarray], int]
+    ) -> None:
         """
         Set a byte using a function that can reference other bytes (flat array view).
 
@@ -209,7 +219,9 @@ class ImageGenerator:
                 return flat[idx-1] ^ 0xFF  # XOR previous byte with 255
         """
         if not (0 <= byte_index < self.byte_count):
-            raise IndexError(f"Byte index {byte_index} out of bounds (max: {self.byte_count - 1})")
+            raise IndexError(
+                f"Byte index {byte_index} out of bounds (max: {self.byte_count - 1})"
+            )
 
         # Create flat view for the function to read from
         flat_view = self.image.reshape(-1)
@@ -255,7 +267,7 @@ class ImageGenerator:
         """
         # Convert NumPy array to PIL Image
         # 'RGB' mode ensures correct color interpretation
-        img = Image.fromarray(self.image, mode='RGB')
+        img = Image.fromarray(self.image, mode="RGB")
         img.save(filename)
         print(f"Image saved to: {filename}")
 
@@ -265,7 +277,7 @@ class ImageGenerator:
 
         Design decision: Useful for quick visualization during development.
         """
-        img = Image.fromarray(self.image, mode='RGB')
+        img = Image.fromarray(self.image, mode="RGB")
         img.show()
 
     def get_numpy_array(self) -> np.ndarray:

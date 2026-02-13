@@ -83,22 +83,21 @@ metrics.plot_all(ImageMetrics.RGB.ALL, save_dir='./test_results')
 """
 
 # NumPy: Core numerical computing - efficient array operations and statistical functions
+# Enum: Type-safe channel selection - prevents invalid channel specifications
+from enum import Enum
+
+# typing: Type hints for better code documentation and IDE support
+from typing import Dict, Optional
+
+# matplotlib.pyplot: Plotting and visualization - histograms, correlation heatmaps
+import matplotlib.pyplot as plt
 import numpy as np
 
 # PIL (Pillow): Image I/O - loading images in various formats
 from PIL import Image
 
-# Enum: Type-safe channel selection - prevents invalid channel specifications
-from enum import Enum
-
-# typing: Type hints for better code documentation and IDE support
-from typing import Dict, Tuple, Optional
-
 # scipy.stats: Statistical functions - chi-square test with p-value calculation
 from scipy import stats
-
-# matplotlib.pyplot: Plotting and visualization - histograms, correlation heatmaps
-import matplotlib.pyplot as plt
 
 
 class ImageMetrics:
@@ -113,10 +112,11 @@ class ImageMetrics:
 
     class RGB(Enum):
         """Enum for specifying which color channel(s) to analyze."""
-        ALL = 0    # Analyze all bytes (R, G, B interleaved)
-        RED = 1    # Analyze only red channel
+
+        ALL = 0  # Analyze all bytes (R, G, B interleaved)
+        RED = 1  # Analyze only red channel
         GREEN = 2  # Analyze only green channel
-        BLUE = 3   # Analyze only blue channel
+        BLUE = 3  # Analyze only blue channel
 
     def __init__(self, filename: str):
         """
@@ -131,7 +131,7 @@ class ImageMetrics:
         try:
             img = Image.open(filename)
             # Convert to RGB to ensure 3 channels (handles RGBA, grayscale, etc.)
-            img_rgb = img.convert('RGB')
+            img_rgb = img.convert("RGB")
             self.image = np.array(img_rgb, dtype=np.uint8)
             self._filename = filename
 
@@ -329,17 +329,18 @@ class ImageMetrics:
         chi2_stat, p_value = stats.chisquare(observed, expected)
 
         return {
-            'statistic': float(chi2_stat),
-            'p_value': float(p_value),
-            'dof': 255  # Degrees of freedom = num_categories - 1
+            "statistic": float(chi2_stat),
+            "p_value": float(p_value),
+            "dof": 255,  # Degrees of freedom = num_categories - 1
         }
 
     # ========================================================================
     # Metric 4: Correlation Coefficient
     # ========================================================================
 
-    def correlation(self, channel: RGB = RGB.ALL,
-                   direction: str = 'horizontal', lag: int = 1) -> float:
+    def correlation(
+        self, channel: RGB = RGB.ALL, direction: str = "horizontal", lag: int = 1
+    ) -> float:
         """
         Compute correlation coefficient between adjacent bytes.
 
@@ -369,7 +370,7 @@ class ImageMetrics:
         """
         data = self._get_channel_data(channel)
 
-        if direction == 'horizontal':
+        if direction == "horizontal":
             # Horizontal: correlation between consecutive bytes in flat array
             # Design note: This is most relevant for byte-sequence PRNGs
             if len(data) <= lag:
@@ -379,7 +380,7 @@ class ImageMetrics:
             x = data[:-lag].astype(np.float64)
             y = data[lag:].astype(np.float64)
 
-        elif direction == 'vertical':
+        elif direction == "vertical":
             # Vertical: correlation between vertically adjacent pixels
             # Need to work with 2D pixel data
             channel_2d = self._get_channel_2d(channel)
@@ -391,7 +392,7 @@ class ImageMetrics:
             x = channel_2d[:-lag, :].flatten().astype(np.float64)
             y = channel_2d[lag:, :].flatten().astype(np.float64)
 
-        elif direction == 'diagonal':
+        elif direction == "diagonal":
             # Diagonal: correlation between diagonally adjacent pixels
             channel_2d = self._get_channel_2d(channel)
 
@@ -403,7 +404,9 @@ class ImageMetrics:
             y = channel_2d[lag:, lag:].flatten().astype(np.float64)
 
         else:
-            raise ValueError(f"Invalid direction: {direction}. Use 'horizontal', 'vertical', or 'diagonal'")
+            raise ValueError(
+                f"Invalid direction: {direction}. Use 'horizontal', 'vertical', or 'diagonal'"
+            )
 
         # Compute Pearson correlation coefficient
         # Design note: np.corrcoef returns a 2x2 correlation matrix,
@@ -501,9 +504,9 @@ class ImageMetrics:
         mad_percentage = (mad / expected * 100.0) if expected > 0 else 0.0
 
         return {
-            'mad': float(mad),
-            'mad_percentage': float(mad_percentage),
-            'expected_frequency': float(expected)
+            "mad": float(mad),
+            "mad_percentage": float(mad_percentage),
+            "expected_frequency": float(expected),
         }
 
     # ========================================================================
@@ -560,8 +563,8 @@ class ImageMetrics:
 
         # Extract x and y coordinates from consecutive byte pairs
         # Design note: First byte of pair = x, second byte = y
-        x_coords = data[0:num_pairs*2:2].astype(np.float64)
-        y_coords = data[1:num_pairs*2:2].astype(np.float64)
+        x_coords = data[0 : num_pairs * 2 : 2].astype(np.float64)
+        y_coords = data[1 : num_pairs * 2 : 2].astype(np.float64)
 
         # Normalize coordinates to [0, 1] range
         # Design note: Divide by 255 (max byte value) to get unit square
@@ -583,19 +586,20 @@ class ImageMetrics:
         error_percentage = (error / true_pi) * 100.0
 
         return {
-            'pi_estimate': float(pi_estimate),
-            'error': float(error),
-            'error_percentage': float(error_percentage),
-            'points_used': int(num_pairs),
-            'true_pi': float(true_pi)
+            "pi_estimate": float(pi_estimate),
+            "error": float(error),
+            "error_percentage": float(error_percentage),
+            "points_used": int(num_pairs),
+            "true_pi": float(true_pi),
         }
 
     # ========================================================================
     # Visualization Methods
     # ========================================================================
 
-    def plot_frequency_distribution(self, channel: RGB = RGB.ALL,
-                                   save_path: Optional[str] = None) -> None:
+    def plot_frequency_distribution(
+        self, channel: RGB = RGB.ALL, save_path: Optional[str] = None
+    ) -> None:
         """
         Plot histogram of byte frequency distribution.
 
@@ -618,45 +622,47 @@ class ImageMetrics:
         plt.figure(figsize=(12, 6))
 
         # Choose color based on channel
-        color_map = {
-            'ALL': 'gray',
-            'RED': 'red',
-            'GREEN': 'green',
-            'BLUE': 'blue'
-        }
-        color = color_map.get(channel.name, 'gray')
+        color_map = {"ALL": "gray", "RED": "red", "GREEN": "green", "BLUE": "blue"}
+        color = color_map.get(channel.name, "gray")
 
         # Plot frequency distribution
-        plt.bar(range(256), freq, color=color, alpha=0.7,
-                label='Observed Frequency')
+        plt.bar(range(256), freq, color=color, alpha=0.7, label="Observed Frequency")
 
         # Plot expected uniform distribution line
-        plt.axhline(y=expected, color='black', linestyle='--',
-                   linewidth=2, label=f'Expected (Uniform): {expected:.2f}')
+        plt.axhline(
+            y=expected,
+            color="black",
+            linestyle="--",
+            linewidth=2,
+            label=f"Expected (Uniform): {expected:.2f}",
+        )
 
         # Add labels and title
         entropy = self.entropy(channel)
         chi2 = self.chi_square(channel)
-        plt.xlabel('Byte Value (0-255)', fontsize=12)
-        plt.ylabel('Frequency', fontsize=12)
-        plt.title(f'Byte Frequency Distribution - {channel.name} Channel\n'
-                 f'Entropy: {entropy:.4f} bits | '
-                 f'Chi-Square p-value: {chi2["p_value"]:.6f}',
-                 fontsize=14)
+        plt.xlabel("Byte Value (0-255)", fontsize=12)
+        plt.ylabel("Frequency", fontsize=12)
+        plt.title(
+            f"Byte Frequency Distribution - {channel.name} Channel\n"
+            f"Entropy: {entropy:.4f} bits | "
+            f"Chi-Square p-value: {chi2['p_value']:.6f}",
+            fontsize=14,
+        )
         plt.legend()
         plt.grid(True, alpha=0.3)
 
         # Save or show
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Plot saved to: {save_path}")
         else:
             plt.show()
 
         plt.close()
 
-    def plot_correlation_heatmap(self, channel: RGB = RGB.ALL,
-                                save_path: Optional[str] = None) -> None:
+    def plot_correlation_heatmap(
+        self, channel: RGB = RGB.ALL, save_path: Optional[str] = None
+    ) -> None:
         """
         Plot 2D correlation heatmap between adjacent pixels.
 
@@ -688,38 +694,48 @@ class ImageMetrics:
 
         # Create 2D histogram heatmap
         # Design note: 256x256 bins for full byte value resolution
-        plt.hist2d(x, y, bins=256, range=[[0, 255], [0, 255]],
-                  cmap='hot', cmin=1)
+        plt.hist2d(x, y, bins=256, range=[[0, 255], [0, 255]], cmap="hot", cmin=1)
 
         # Add colorbar
         cbar = plt.colorbar()
-        cbar.set_label('Frequency', fontsize=12)
+        cbar.set_label("Frequency", fontsize=12)
 
         # Add correlation coefficient to title
-        corr = self.correlation(channel, 'horizontal')
-        plt.xlabel('Current Byte Value', fontsize=12)
-        plt.ylabel('Next Byte Value', fontsize=12)
-        plt.title(f'Sequential Correlation Heatmap - {channel.name} Channel\n'
-                 f'Correlation Coefficient: {corr:+.6f}',
-                 fontsize=14)
+        corr = self.correlation(channel, "horizontal")
+        plt.xlabel("Current Byte Value", fontsize=12)
+        plt.ylabel("Next Byte Value", fontsize=12)
+        plt.title(
+            f"Sequential Correlation Heatmap - {channel.name} Channel\n"
+            f"Correlation Coefficient: {corr:+.6f}",
+            fontsize=14,
+        )
 
         # Add diagonal line (perfect correlation reference)
-        plt.plot([0, 255], [0, 255], 'c--', linewidth=2, alpha=0.5,
-                label='Perfect Correlation')
+        plt.plot(
+            [0, 255],
+            [0, 255],
+            "c--",
+            linewidth=2,
+            alpha=0.5,
+            label="Perfect Correlation",
+        )
         plt.legend()
 
         # Save or show
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Plot saved to: {save_path}")
         else:
             plt.show()
 
         plt.close()
 
-    def plot_monte_carlo_visualization(self, channel: RGB = RGB.ALL,
-                                      max_points: int = 10000,
-                                      save_path: Optional[str] = None) -> None:
+    def plot_monte_carlo_visualization(
+        self,
+        channel: RGB = RGB.ALL,
+        max_points: int = 10000,
+        save_path: Optional[str] = None,
+    ) -> None:
         """
         Visualize Monte Carlo π estimation by plotting points.
 
@@ -747,8 +763,8 @@ class ImageMetrics:
         num_pairs = min(len(data) // 2, max_points)
 
         # Extract and normalize coordinates
-        x = data[0:num_pairs*2:2].astype(np.float64) / 255.0
-        y = data[1:num_pairs*2:2].astype(np.float64) / 255.0
+        x = data[0 : num_pairs * 2 : 2].astype(np.float64) / 255.0
+        y = data[1 : num_pairs * 2 : 2].astype(np.float64) / 255.0
 
         # Determine which points are inside quarter circle
         distances_squared = x**2 + y**2
@@ -761,42 +777,55 @@ class ImageMetrics:
         plt.figure(figsize=(10, 10))
 
         # Plot points inside and outside circle with different colors
-        plt.scatter(x[inside], y[inside], c='blue', s=1, alpha=0.5,
-                   label=f'Inside Circle ({np.sum(inside)} points)')
-        plt.scatter(x[~inside], y[~inside], c='red', s=1, alpha=0.5,
-                   label=f'Outside Circle ({np.sum(~inside)} points)')
+        plt.scatter(
+            x[inside],
+            y[inside],
+            c="blue",
+            s=1,
+            alpha=0.5,
+            label=f"Inside Circle ({np.sum(inside)} points)",
+        )
+        plt.scatter(
+            x[~inside],
+            y[~inside],
+            c="red",
+            s=1,
+            alpha=0.5,
+            label=f"Outside Circle ({np.sum(~inside)} points)",
+        )
 
         # Draw quarter circle boundary
-        theta = np.linspace(0, np.pi/2, 100)
+        theta = np.linspace(0, np.pi / 2, 100)
         circle_x = np.cos(theta)
         circle_y = np.sin(theta)
-        plt.plot(circle_x, circle_y, 'black', linewidth=2, label='Quarter Circle')
+        plt.plot(circle_x, circle_y, "black", linewidth=2, label="Quarter Circle")
 
         # Format plot
         plt.xlim(0, 1)
         plt.ylim(0, 1)
-        plt.xlabel('X (Normalized)', fontsize=12)
-        plt.ylabel('Y (Normalized)', fontsize=12)
-        plt.title(f'Monte Carlo π Estimation - {channel.name} Channel\n'
-                 f'π Estimate: {pi_result["pi_estimate"]:.6f} | '
-                 f'True π: {pi_result["true_pi"]:.6f} | '
-                 f'Error: {pi_result["error_percentage"]:.2f}%',
-                 fontsize=14)
+        plt.xlabel("X (Normalized)", fontsize=12)
+        plt.ylabel("Y (Normalized)", fontsize=12)
+        plt.title(
+            f"Monte Carlo π Estimation - {channel.name} Channel\n"
+            f"π Estimate: {pi_result['pi_estimate']:.6f} | "
+            f"True π: {pi_result['true_pi']:.6f} | "
+            f"Error: {pi_result['error_percentage']:.2f}%",
+            fontsize=14,
+        )
         plt.legend()
         plt.grid(True, alpha=0.3)
-        plt.gca().set_aspect('equal', adjustable='box')
+        plt.gca().set_aspect("equal", adjustable="box")
 
         # Save or show
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Plot saved to: {save_path}")
         else:
             plt.show()
 
         plt.close()
 
-    def plot_all(self, channel: RGB = RGB.ALL,
-                save_dir: Optional[str] = None) -> None:
+    def plot_all(self, channel: RGB = RGB.ALL, save_dir: Optional[str] = None) -> None:
         """
         Generate all visualization plots at once.
 
@@ -811,9 +840,13 @@ class ImageMetrics:
 
         if save_dir:
             os.makedirs(save_dir, exist_ok=True)
-            freq_path = os.path.join(save_dir, f'frequency_{channel.name.lower()}.png')
-            corr_path = os.path.join(save_dir, f'correlation_{channel.name.lower()}.png')
-            monte_path = os.path.join(save_dir, f'monte_carlo_{channel.name.lower()}.png')
+            freq_path = os.path.join(save_dir, f"frequency_{channel.name.lower()}.png")
+            corr_path = os.path.join(
+                save_dir, f"correlation_{channel.name.lower()}.png"
+            )
+            monte_path = os.path.join(
+                save_dir, f"monte_carlo_{channel.name.lower()}.png"
+            )
         else:
             freq_path = None
             corr_path = None
@@ -855,21 +888,21 @@ class ImageMetrics:
         mc_pi_result = self.monte_carlo_pi(channel)
 
         return {
-            'channel': channel.name,
-            'entropy': self.entropy(channel),
-            'chi_square': chi2_result,
-            'correlation_horizontal': self.correlation(channel, 'horizontal'),
-            'correlation_vertical': self.correlation(channel, 'vertical'),
-            'correlation_diagonal': self.correlation(channel, 'diagonal'),
-            'mean_absolute_deviation': mad_result,
-            'monte_carlo_pi': mc_pi_result,
-            'byte_frequency': freq,
-            'unique_values': int(np.count_nonzero(freq)),
-            'total_bytes': len(data),
-            'mean': float(np.mean(data)),
-            'std_dev': float(np.std(data)),
-            'min': int(np.min(data)),
-            'max': int(np.max(data))
+            "channel": channel.name,
+            "entropy": self.entropy(channel),
+            "chi_square": chi2_result,
+            "correlation_horizontal": self.correlation(channel, "horizontal"),
+            "correlation_vertical": self.correlation(channel, "vertical"),
+            "correlation_diagonal": self.correlation(channel, "diagonal"),
+            "mean_absolute_deviation": mad_result,
+            "monte_carlo_pi": mc_pi_result,
+            "byte_frequency": freq,
+            "unique_values": int(np.count_nonzero(freq)),
+            "total_bytes": len(data),
+            "mean": float(np.mean(data)),
+            "std_dev": float(np.std(data)),
+            "min": int(np.min(data)),
+            "max": int(np.max(data)),
         }
 
     def summary(self, channel: RGB = RGB.ALL, verbose: bool = False) -> str:
@@ -889,7 +922,7 @@ class ImageMetrics:
         analysis = self.analyze_all(channel)
 
         # Interpret entropy
-        entropy = analysis['entropy']
+        entropy = analysis["entropy"]
         if entropy > 7.9:
             entropy_quality = "Excellent (cryptographically random)"
         elif entropy > 7.5:
@@ -902,7 +935,7 @@ class ImageMetrics:
             entropy_quality = "Very Low (highly structured/uniform)"
 
         # Interpret chi-square p-value
-        p_value = analysis['chi_square']['p_value']
+        p_value = analysis["chi_square"]["p_value"]
         if p_value > 0.05:
             chi2_quality = "PASS (appears uniform)"
         elif p_value > 0.01:
@@ -911,9 +944,9 @@ class ImageMetrics:
             chi2_quality = "FAIL (significantly non-uniform)"
 
         # Interpret correlations
-        corr_h = abs(analysis['correlation_horizontal'])
-        corr_v = abs(analysis['correlation_vertical'])
-        corr_d = abs(analysis['correlation_diagonal'])
+        corr_h = abs(analysis["correlation_horizontal"])
+        corr_v = abs(analysis["correlation_vertical"])
+        corr_d = abs(analysis["correlation_diagonal"])
 
         def interpret_correlation(corr):
             if corr < 0.1:
@@ -928,7 +961,7 @@ class ImageMetrics:
                 return "Very Poor (highly correlated)"
 
         # Interpret MAD
-        mad_pct = analysis['mean_absolute_deviation']['mad_percentage']
+        mad_pct = analysis["mean_absolute_deviation"]["mad_percentage"]
         if mad_pct < 5.0:
             mad_quality = "Excellent (very uniform)"
         elif mad_pct < 10.0:
@@ -939,7 +972,7 @@ class ImageMetrics:
             mad_quality = "Poor (highly non-uniform)"
 
         # Interpret Monte Carlo π
-        mc_error_pct = analysis['monte_carlo_pi']['error_percentage']
+        mc_error_pct = analysis["monte_carlo_pi"]["error_percentage"]
         if mc_error_pct < 1.0:
             mc_quality = "Excellent (highly random)"
         elif mc_error_pct < 3.0:
@@ -952,12 +985,12 @@ class ImageMetrics:
             mc_quality = "Poor (significant bias)"
 
         report = f"""
-{'='*70}
+{"=" * 70}
 Image Metrics Analysis
-{'='*70}
+{"=" * 70}
 File: {self.filename}
 Dimensions: {self.width} × {self.height} pixels
-Channel: {analysis['channel']}
+Channel: {analysis["channel"]}
 
 SHANNON ENTROPY
   Value: {entropy:.6f} bits
@@ -965,40 +998,40 @@ SHANNON ENTROPY
   Theoretical Maximum: 8.000000 bits
 
 CHI-SQUARE TEST (Uniformity)
-  Statistic: {analysis['chi_square']['statistic']:.2f}
+  Statistic: {analysis["chi_square"]["statistic"]:.2f}
   P-Value: {p_value:.6f}
   Result: {chi2_quality}
-  Degrees of Freedom: {analysis['chi_square']['dof']}
+  Degrees of Freedom: {analysis["chi_square"]["dof"]}
 
 MEAN ABSOLUTE DEVIATION
-  MAD Value: {analysis['mean_absolute_deviation']['mad']:.2f}
+  MAD Value: {analysis["mean_absolute_deviation"]["mad"]:.2f}
   MAD Percentage: {mad_pct:.2f}%
   Quality: {mad_quality}
-  Expected Frequency: {analysis['mean_absolute_deviation']['expected_frequency']:.2f}
+  Expected Frequency: {analysis["mean_absolute_deviation"]["expected_frequency"]:.2f}
 
 MONTE CARLO π ESTIMATION
-  Estimated π: {analysis['monte_carlo_pi']['pi_estimate']:.6f}
-  True π: {analysis['monte_carlo_pi']['true_pi']:.6f}
-  Error: {analysis['monte_carlo_pi']['error']:.6f} ({mc_error_pct:.2f}%)
+  Estimated π: {analysis["monte_carlo_pi"]["pi_estimate"]:.6f}
+  True π: {analysis["monte_carlo_pi"]["true_pi"]:.6f}
+  Error: {analysis["monte_carlo_pi"]["error"]:.6f} ({mc_error_pct:.2f}%)
   Quality: {mc_quality}
-  Points Used: {analysis['monte_carlo_pi']['points_used']:,}
+  Points Used: {analysis["monte_carlo_pi"]["points_used"]:,}
 
 CORRELATION ANALYSIS
-  Horizontal: {analysis['correlation_horizontal']:+.6f} - {interpret_correlation(corr_h)}
-  Vertical:   {analysis['correlation_vertical']:+.6f} - {interpret_correlation(corr_v)}
-  Diagonal:   {analysis['correlation_diagonal']:+.6f} - {interpret_correlation(corr_d)}
+  Horizontal: {analysis["correlation_horizontal"]:+.6f} - {interpret_correlation(corr_h)}
+  Vertical:   {analysis["correlation_vertical"]:+.6f} - {interpret_correlation(corr_v)}
+  Diagonal:   {analysis["correlation_diagonal"]:+.6f} - {interpret_correlation(corr_d)}
 
 BYTE STATISTICS
-  Total Bytes: {analysis['total_bytes']:,}
-  Unique Values: {analysis['unique_values']}/256 ({100*analysis['unique_values']/256:.1f}%)
-  Mean: {analysis['mean']:.2f}
-  Std Dev: {analysis['std_dev']:.2f}
-  Range: [{analysis['min']}, {analysis['max']}]
+  Total Bytes: {analysis["total_bytes"]:,}
+  Unique Values: {analysis["unique_values"]}/256 ({100 * analysis["unique_values"] / 256:.1f}%)
+  Mean: {analysis["mean"]:.2f}
+  Std Dev: {analysis["std_dev"]:.2f}
+  Range: [{analysis["min"]}, {analysis["max"]}]
 
 DISTRIBUTION ANALYSIS
-  Most Common Value: {np.argmax(analysis['byte_frequency'])} (appears {np.max(analysis['byte_frequency']):,} times)
-  Expected per Value (uniform): {analysis['total_bytes']/256:.2f}
-{'='*70}
+  Most Common Value: {np.argmax(analysis["byte_frequency"])} (appears {np.max(analysis["byte_frequency"]):,} times)
+  Expected per Value (uniform): {analysis["total_bytes"] / 256:.2f}
+{"=" * 70}
 """
 
         if verbose:
