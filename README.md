@@ -36,7 +36,7 @@ Pixel Lab provides fine-grained control over image generation at the pixel and b
 ```bash
 git clone https://github.com/yourusername/pixel-lab.git
 cd pixel-lab
-pip install -e .
+pip install -e . # -e flag installs in developer mode
 ```
 
 ### Install dependencies only
