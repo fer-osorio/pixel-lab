@@ -220,7 +220,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT License - See LICENSE file for details
+GPL-3.0 license - See LICENSE file for details
 
 ## Citation
 
