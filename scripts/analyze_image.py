@@ -8,7 +8,8 @@ import argparse
 # sys: System-specific parameters (stderr, exit codes) for CLI error handling
 import sys
 
-from image_toolkit import ImageMetrics
+from pixel_lab import ImageMetrics
+
 
 def main():
     """
@@ -19,7 +20,7 @@ def main():
     with other tools.
     """
     parser = argparse.ArgumentParser(
-        description='Analyze statistical and cryptanalytic properties of images',
+        description="Analyze statistical and cryptanalytic properties of images",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -32,56 +33,55 @@ Examples:
 
 Channel options: all, red, green, blue
 Metric options: entropy, chi_square, correlation, mad, monte_carlo, all
-        """
+        """,
+    )
+
+    parser.add_argument("image", help="Path to image file")
+
+    parser.add_argument(
+        "--channel",
+        "-c",
+        choices=["all", "red", "green", "blue"],
+        default="all",
+        help="Color channel to analyze (default: all)",
     )
 
     parser.add_argument(
-        'image',
-        help='Path to image file'
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Show detailed interpretation guide",
     )
 
     parser.add_argument(
-        '--channel', '-c',
-        choices=['all', 'red', 'green', 'blue'],
-        default='all',
-        help='Color channel to analyze (default: all)'
+        "--metrics",
+        "-m",
+        nargs="+",
+        choices=["entropy", "chi_square", "correlation", "mad", "monte_carlo", "all"],
+        default=["all"],
+        help="Specific metrics to compute (default: all)",
     )
 
     parser.add_argument(
-        '--verbose', '-v',
-        action='store_true',
-        help='Show detailed interpretation guide'
+        "--plot", "-p", action="store_true", help="Generate visualization plots"
     )
 
     parser.add_argument(
-        '--metrics', '-m',
-        nargs='+',
-        choices=['entropy', 'chi_square', 'correlation', 'mad', 'monte_carlo', 'all'],
-        default=['all'],
-        help='Specific metrics to compute (default: all)'
-    )
-
-    parser.add_argument(
-        '--plot', '-p',
-        action='store_true',
-        help='Generate visualization plots'
-    )
-
-    parser.add_argument(
-        '--save-plots', '-s',
+        "--save-plots",
+        "-s",
         type=str,
-        metavar='DIR',
-        help='Save plots to specified directory instead of displaying'
+        metavar="DIR",
+        help="Save plots to specified directory instead of displaying",
     )
 
     args = parser.parse_args()
 
     # Map string argument to enum
     channel_map = {
-        'all': ImageMetrics.RGB.ALL,
-        'red': ImageMetrics.RGB.RED,
-        'green': ImageMetrics.RGB.GREEN,
-        'blue': ImageMetrics.RGB.BLUE
+        "all": ImageMetrics.RGB.ALL,
+        "red": ImageMetrics.RGB.RED,
+        "green": ImageMetrics.RGB.GREEN,
+        "blue": ImageMetrics.RGB.BLUE,
     }
     channel = channel_map[args.channel]
 
@@ -90,7 +90,7 @@ Metric options: entropy, chi_square, correlation, mad, monte_carlo, all
         metrics = ImageMetrics(args.image)
 
         # Determine which metrics to show
-        show_all = 'all' in args.metrics
+        show_all = "all" in args.metrics
 
         if show_all:
             # Show complete summary
@@ -101,44 +101,44 @@ Metric options: entropy, chi_square, correlation, mad, monte_carlo, all
                 metrics.plot_all(channel, save_dir=args.save_plots)
         else:
             # Show only requested metrics
-            print(f"\n{'='*70}")
+            print(f"\n{'=' * 70}")
             print(f"Image: {args.image}")
             print(f"Channel: {channel.name}")
-            print('='*70)
+            print("=" * 70)
 
-            if 'entropy' in args.metrics:
+            if "entropy" in args.metrics:
                 entropy = metrics.entropy(channel)
                 print(f"\nEntropy: {entropy:.6f} bits")
 
-            if 'chi_square' in args.metrics:
+            if "chi_square" in args.metrics:
                 chi2 = metrics.chi_square(channel)
                 print(f"\nChi-Square:")
                 print(f"  Statistic: {chi2['statistic']:.2f}")
                 print(f"  P-Value: {chi2['p_value']:.6f}")
                 print(f"  Result: {'PASS' if chi2['p_value'] > 0.05 else 'FAIL'}")
 
-            if 'mad' in args.metrics:
+            if "mad" in args.metrics:
                 mad = metrics.mean_absolute_deviation(channel)
                 print(f"\nMean Absolute Deviation:")
                 print(f"  MAD: {mad['mad']:.2f}")
                 print(f"  MAD %: {mad['mad_percentage']:.2f}%")
 
-            if 'monte_carlo' in args.metrics:
+            if "monte_carlo" in args.metrics:
                 mc = metrics.monte_carlo_pi(channel)
                 print(f"\nMonte Carlo π Estimation:")
                 print(f"  Estimated π: {mc['pi_estimate']:.6f}")
                 print(f"  Error: {mc['error_percentage']:.2f}%")
 
-            if 'correlation' in args.metrics:
-                corr_h = metrics.correlation(channel, 'horizontal')
-                corr_v = metrics.correlation(channel, 'vertical')
-                corr_d = metrics.correlation(channel, 'diagonal')
+            if "correlation" in args.metrics:
+                corr_h = metrics.correlation(channel, "horizontal")
+                corr_v = metrics.correlation(channel, "vertical")
+                corr_d = metrics.correlation(channel, "diagonal")
                 print(f"\nCorrelation:")
                 print(f"  Horizontal: {corr_h:+.6f}")
                 print(f"  Vertical:   {corr_v:+.6f}")
                 print(f"  Diagonal:   {corr_d:+.6f}")
 
-            print('='*70 + '\n')
+            print("=" * 70 + "\n")
 
             # Generate plots if requested
             if args.plot or args.save_plots:

@@ -1,4 +1,5 @@
-from image_toolkit import ImageGenerator
+from pixel_lab import ImageGenerator
+
 
 def direct_byte_assignment():
     """Example: Create a pattern using direct byte assignment."""
@@ -11,6 +12,7 @@ def direct_byte_assignment():
         gen.set_byte(i, i & 255)
 
     gen.save("direct_byte_assignment.png")
+
 
 if __name__ == "__main__":
     direct_byte_assignment()

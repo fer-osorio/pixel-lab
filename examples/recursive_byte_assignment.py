@@ -1,5 +1,6 @@
-from image_toolkit import ImageGenerator
 import numpy as np
+from pixel_lab import ImageGenerator
+
 
 def recursive_byte_assignment():
     """Example: Create a pattern where each byte depends on previous bytes."""
@@ -22,6 +23,7 @@ def recursive_byte_assignment():
         gen.set_byte_recursive(i, xor_pattern)
 
     gen.save("recursive_byte_assignment.png")
+
 
 if __name__ == "__main__":
     recursive_byte_assignment()

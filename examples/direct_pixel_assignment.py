@@ -1,4 +1,5 @@
-from image_toolkit import ImageGenerator
+from pixel_lab import ImageGenerator
+
 
 def direct_pixel_assignment():
     """Example: Create a simple gradient using direct pixel assignment."""
@@ -19,6 +20,7 @@ def direct_pixel_assignment():
             gen.set_pixel(x, y, x, y, 255 - y)
 
     gen.save("direct_pixel_assignment.png")
+
 
 if __name__ == "__main__":
     direct_pixel_assignment()
