@@ -156,6 +156,33 @@ Explore the `examples/` directory for detailed tutorials:
 - **03_prng_testing.py** - Validating pseudo-random number generators
 - **04_cryptanalysis.py** - Full cryptanalytic workflow
 
+### Running Examples
+
+Use the automated runner script to execute examples:
+
+```bash
+# Run a specific example
+cd examples/
+./run_examples.sh 01_basic_generation.py
+
+# Run all examples
+./run_examples.sh --all
+
+# Run examples by category
+./run_examples.sh --pixel       # All pixel-related examples
+./run_examples.sh --byte        # All byte-related examples
+./run_examples.sh --direct      # All direct assignment examples
+./run_examples.sh --recursive   # All recursive examples
+
+# Verbose mode (show full output)
+./run_examples.sh --all --verbose
+
+# Get help
+./run_examples.sh --help
+```
+
+The runner validates scripts, provides colored output, and shows a summary report.
+
 ## Use Cases
 
 ### PRNG Validation
@@ -208,7 +235,7 @@ pixel-lab/
 └── docs/              # Documentation
 ```
 
-## Documentation (Comming soon)
+## Documentation
 
 - [Generator Guide](docs/generator_guide.md) - Complete ImageGenerator documentation
 - [Metrics Guide](docs/metrics_guide.md) - Complete ImageMetrics documentation
@@ -220,7 +247,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-GPL-3.0 license - See LICENSE file for details
+MIT License - See LICENSE file for details
 
 ## Citation
 
@@ -229,9 +256,9 @@ If you use Pixel Lab in your research, please cite:
 ```bibtex
 @software{pixel_lab,
   title = {Pixel Lab: Pixel-Level Image Generation and Cryptanalytic Analysis},
-  author = {Alexis Fernando Osorio Sarabio},
+  author = {Your Name},
   year = {2025},
-  url = {https://github.com/fer-osorio/pixel-lab}
+  url = {https://github.com/yourusername/pixel-lab}
 }
 ```
 
