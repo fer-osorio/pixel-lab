@@ -235,7 +235,7 @@ pixel-lab/
 └── docs/              # Documentation
 ```
 
-## Documentation
+## Documentation (Coming soon)
 
 - [Generator Guide](docs/generator_guide.md) - Complete ImageGenerator documentation
 - [Metrics Guide](docs/metrics_guide.md) - Complete ImageMetrics documentation
@@ -247,7 +247,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT License - See LICENSE file for details
+GPL-3.0 License - See LICENSE file for details
 
 ## Citation
 
