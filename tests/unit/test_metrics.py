@@ -372,6 +372,7 @@ def test_monte_carlo_pi_insufficient_data(small_image: Path) -> None:
 # ============================================================================
 
 
+@pytest.mark.slow
 def test_plot_generation_no_crash(uniform_random_image: Path, tmp_path: Path) -> None:
     """
     Test that plot generation functions execute without crashing.
