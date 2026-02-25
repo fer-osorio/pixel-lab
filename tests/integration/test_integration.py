@@ -37,6 +37,7 @@ from pixel_lab import ImageGenerator, ImageMetrics
 # ============================================================================
 
 
+@pytest.mark.slow
 def test_generate_random_analyze_passes(tmp_path: Path) -> None:
     """
     Integration test: Generate random image → Analyze → Verify passes tests.
@@ -271,6 +272,7 @@ def test_recursive_byte_generation_creates_sequence(tmp_path: Path) -> None:
 # ============================================================================
 
 
+@pytest.mark.slow
 def test_complete_analysis_workflow(tmp_path: Path) -> None:
     """
     Integration test: Generate → Analyze → Visualize → Verify all outputs.
