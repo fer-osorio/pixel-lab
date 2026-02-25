@@ -112,20 +112,22 @@ Metric options: entropy, chi_square, correlation, mad, monte_carlo, all
 
             if "chi_square" in args.metrics:
                 chi2 = metrics.chi_square(channel)
-                print(f"\nChi-Square:")
+                print("\nChi-Square:")
                 print(f"  Statistic: {chi2['statistic']:.2f}")
                 print(f"  P-Value: {chi2['p_value']:.6f}")
-                print(f"  Result: {'PASS' if chi2['p_value'] > 0.05 else 'FAIL'}")
+                print(
+                    f"  Result: {'PASS' if 0.05 < chi2['p_value'] < 0.95 else 'FAIL'}"
+                )
 
             if "mad" in args.metrics:
                 mad = metrics.mean_absolute_deviation(channel)
-                print(f"\nMean Absolute Deviation:")
+                print("\nMean Absolute Deviation:")
                 print(f"  MAD: {mad['mad']:.2f}")
                 print(f"  MAD %: {mad['mad_percentage']:.2f}%")
 
             if "monte_carlo" in args.metrics:
                 mc = metrics.monte_carlo_pi(channel)
-                print(f"\nMonte Carlo π Estimation:")
+                print("\nMonte Carlo π Estimation:")
                 print(f"  Estimated π: {mc['pi_estimate']:.6f}")
                 print(f"  Error: {mc['error_percentage']:.2f}%")
 
@@ -133,7 +135,7 @@ Metric options: entropy, chi_square, correlation, mad, monte_carlo, all
                 corr_h = metrics.correlation(channel, "horizontal")
                 corr_v = metrics.correlation(channel, "vertical")
                 corr_d = metrics.correlation(channel, "diagonal")
-                print(f"\nCorrelation:")
+                print("\nCorrelation:")
                 print(f"  Horizontal: {corr_h:+.6f}")
                 print(f"  Vertical:   {corr_v:+.6f}")
                 print(f"  Diagonal:   {corr_d:+.6f}")
