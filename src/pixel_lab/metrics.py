@@ -368,40 +368,34 @@ class ImageMetrics:
         Use case: Detecting sequential patterns in PRNG output, analyzing
         spatial correlation in generated images.
         """
-        data = self._get_channel_data(channel)
+        channel_2d = self._get_channel_2d(channel)
 
         if direction == "horizontal":
-            # Horizontal: correlation between consecutive bytes in flat array
-            # Design note: This is most relevant for byte-sequence PRNGs
-            if len(data) <= lag:
-                raise ValueError("Lag too large for data size")
+            # Horizontal: correlation between horizontal adjacent pixels
+            if channel_2d.shape[1] <= lag:
+                raise ValueError("Lag too large for image width")
 
-            # Split into pairs: [x0, x1, x2, ...] -> [x0, x1, ...] and [x1, x2, ...]
-            x = data[:-lag].astype(np.float64)
-            y = data[lag:].astype(np.float64)
+            # Compare columns: pixels[row][col] with pixels[row][col+lag]
+            x = channel_2d[:, :-lag:lag].flatten().astype(np.float64)
+            y = channel_2d[:, lag::lag].flatten().astype(np.float64)
 
         elif direction == "vertical":
             # Vertical: correlation between vertically adjacent pixels
-            # Need to work with 2D pixel data
-            channel_2d = self._get_channel_2d(channel)
-
             if channel_2d.shape[0] <= lag:
                 raise ValueError("Lag too large for image height")
 
             # Compare rows: pixels[row] with pixels[row+lag]
-            x = channel_2d[:-lag, :].flatten().astype(np.float64)
-            y = channel_2d[lag:, :].flatten().astype(np.float64)
+            x = channel_2d[:-lag:lag, :].flatten().astype(np.float64)
+            y = channel_2d[lag::lag, :].flatten().astype(np.float64)
 
         elif direction == "diagonal":
             # Diagonal: correlation between diagonally adjacent pixels
-            channel_2d = self._get_channel_2d(channel)
-
             if channel_2d.shape[0] <= lag or channel_2d.shape[1] <= lag:
                 raise ValueError("Lag too large for image dimensions")
 
             # Compare diagonals: pixels[row, col] with pixels[row+lag, col+lag]
-            x = channel_2d[:-lag, :-lag].flatten().astype(np.float64)
-            y = channel_2d[lag:, lag:].flatten().astype(np.float64)
+            x = channel_2d[:-lag:lag, :-lag:lag].flatten().astype(np.float64)
+            y = channel_2d[lag::lag, lag::lag].flatten().astype(np.float64)
 
         else:
             raise ValueError(
@@ -937,7 +931,10 @@ class ImageMetrics:
         # Interpret chi-square p-value
         p_value = analysis["chi_square"]["p_value"]
         if p_value > 0.05:
-            chi2_quality = "PASS (appears uniform)"
+            if p_value >= 0.95:
+                chi2_quality = "SUSPICIOUS (appears TOO uniform)"
+            else:
+                chi2_quality = "PASS (appears uniform)"
         elif p_value > 0.01:
             chi2_quality = "MARGINAL (slight non-uniformity)"
         else:
