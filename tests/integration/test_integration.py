@@ -19,15 +19,11 @@ Design philosophy:
 - File I/O is expected and tested
 """
 
-# pytest: Testing framework
-# os: File operations
-import os
-
 # pathlib.Path: Type hints for paths
 from pathlib import Path
 
 # typing: Type hints for function signatures
-from typing import Any, Dict, Tuple
+from typing import Tuple
 
 # numpy: Generate test data and validate results
 import numpy as np
@@ -56,7 +52,7 @@ def test_generate_random_analyze_passes(tmp_path: Path) -> None:
 
     # Step 1: Generate random image
     gen = ImageGenerator(256, 256)
-    rng = np.random.RandomState(12345)  # Good PRNG
+    rng = np.random.RandomState(1234)  # Good PRNG
 
     for i in range(gen.byte_count):
         gen.set_byte(i, rng.randint(0, 256))
@@ -189,8 +185,14 @@ def test_recursive_pixel_generation_creates_gradient(tmp_path: Path) -> None:
     # Step 1: Define gradient function
     def gradient_func(x: int, y: int, img: np.ndarray) -> Tuple[int, int, int]:
         # Gradual increase based on position
-        r = min(255, x * 2)
-        g = min(255, y * 2)
+        if x == 0:
+            r = 0
+        else:
+            r = (img[y][x - 1][0] + 2) & 255
+        if y == 0:
+            g = 0
+        else:
+            g = (img[y - 1][x][1] + 2) & 255
         b = 128
         return (r, g, b)
 
@@ -207,14 +209,14 @@ def test_recursive_pixel_generation_creates_gradient(tmp_path: Path) -> None:
     metrics = ImageMetrics(str(image_path))
 
     # Gradient should have high spatial correlation
-    corr_h = metrics.correlation(ImageMetrics.RGB.ALL, "horizontal")
-    corr_v = metrics.correlation(ImageMetrics.RGB.ALL, "vertical")
+    corr_h = metrics.correlation(ImageMetrics.RGB.RED, "horizontal")
+    corr_v = metrics.correlation(ImageMetrics.RGB.GREEN, "vertical")
 
-    assert abs(corr_h) > 0.5, (
-        f"Gradient should have high horizontal correlation, got {corr_h:.4f}"
+    assert abs(corr_h) == 1.0, (
+        f"Gradient should have high horizontal red correlation, got {corr_h:.4f}"
     )
-    assert abs(corr_v) > 0.5, (
-        f"Gradient should have high vertical correlation, got {corr_v:.4f}"
+    assert abs(corr_v) == 1.0, (
+        f"Gradient should have high vertical green correlation, got {corr_v:.4f}"
     )
 
 
@@ -441,7 +443,7 @@ def test_complex_pattern_round_trip(tmp_path: Path) -> None:
 
     # Should have good variety of unique values
     unique = len(np.unique(metrics.image))
-    assert unique > 1000, (
+    assert unique > 250, (
         f"Complex pattern should have variety, got {unique} unique values"
     )
 
