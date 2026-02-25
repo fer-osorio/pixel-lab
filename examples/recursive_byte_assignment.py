@@ -1,10 +1,11 @@
 import numpy as np
+
 from pixel_lab import ImageGenerator
 
 
 def recursive_byte_assignment():
     """Example: Create a pattern where each byte depends on previous bytes."""
-    print("\n=== Example 4: Recursive Byte Assignment (XOR Pattern) ===")
+    print("\n=== Example: Recursive Byte Assignment (XOR Pattern) ===")
 
     gen = ImageGenerator(256, 256)
 

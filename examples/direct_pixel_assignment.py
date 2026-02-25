@@ -3,7 +3,7 @@ from pixel_lab import ImageGenerator
 
 def direct_pixel_assignment():
     """Example: Create a simple gradient using direct pixel assignment."""
-    print("\n=== Example 1: Direct Pixel Assignment (Gradient) ===")
+    print("\n=== Example: Direct Pixel Assignment (Gradient) ===")
 
     gen = ImageGenerator(256, 256)
 

@@ -1,12 +1,13 @@
 from typing import Tuple
 
 import numpy as np
+
 from pixel_lab import ImageGenerator
 
 
 def recursive_pixel_assignment():
     """Example: Create a pattern where each pixel depends on its neighbors."""
-    print("\n=== Example 3: Recursive Pixel Assignment (Neighbor Average) ===")
+    print("\n=== Example: Recursive Pixel Assignment (Neighbor Average) ===")
 
     gen = ImageGenerator(256, 256)
     div = 15  # Sets the position of the bright pixels, div has the form 2^k - 1
