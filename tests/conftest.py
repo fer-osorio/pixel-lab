@@ -16,7 +16,7 @@ Design decisions:
 from pathlib import Path
 
 # typing: Type hints for function signatures
-from typing import Callable, Tuple
+from typing import Tuple
 
 # numpy: Generate deterministic test data with fixed random seed
 import numpy as np
@@ -152,29 +152,6 @@ def small_image(temp_image_path: Path) -> Path:
     gen.set_pixel(0, 0, 255, 128, 64)
     gen.save(str(temp_image_path))
     return temp_image_path
-
-
-# ============================================================================
-# Test Utilities
-# ============================================================================
-
-
-@pytest.fixture
-def deterministic_rng() -> Callable[[int], np.random.RandomState]:
-    """
-    Provides a seeded random number generator for deterministic tests.
-
-    Design decision: Return a callable that creates new RNG instances
-    to avoid state pollution between tests.
-
-    Returns:
-        Function that creates RandomState with fixed seed
-    """
-
-    def _make_rng(seed: int = 42) -> np.random.RandomState:
-        return np.random.RandomState(seed)
-
-    return _make_rng
 
 
 # ============================================================================
