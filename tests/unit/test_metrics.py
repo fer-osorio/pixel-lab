@@ -9,7 +9,7 @@ Tests organized by functionality:
 5. MAD tests (2 tests)
 6. Monte Carlo π tests (2 tests)
 7. Visualization tests (1 test)
-8. Edge cases - Week 2 (5 tests)
+8. Edge cases (5 tests)
 
 Total: 20 tests
 
@@ -211,17 +211,44 @@ def test_correlation_gradient_image_high(gradient_image: Path) -> None:
     Test that correlation is high for gradient data.
 
     Design decision: Gradients have strong spatial correlation - adjacent
-    pixels have very similar values.
+    pixels have very similar values in the same channels.
     """
     metrics = ImageMetrics(str(gradient_image))
 
     # Test horizontal and vertical (both are gradients in this image)
-    corr_h = metrics.correlation(ImageMetrics.RGB.ALL, "horizontal")
-    corr_v = metrics.correlation(ImageMetrics.RGB.ALL, "vertical")
+    # Must be almost one
+    corr_vr = metrics.correlation(ImageMetrics.RGB.RED, "vertical")
+    # Must be almost one
+    corr_hg = metrics.correlation(ImageMetrics.RGB.GREEN, "horizontal")
+    # Must be almost one
+    corr_dr = metrics.correlation(ImageMetrics.RGB.RED, "diagonal")
+    # Must be almost one
+    corr_dg = metrics.correlation(ImageMetrics.RGB.GREEN, "diagonal")
 
     # Gradients should show high correlation
-    assert_correlation_type(corr_h, "high")
-    assert_correlation_type(corr_v, "high")
+    assert_correlation_type(corr_vr, "one")
+    assert_correlation_type(corr_hg, "one")
+    assert_correlation_type(corr_dr, "one")
+    assert_correlation_type(corr_dg, "one")
+
+
+def test_correlation_gradient_image_constant_component(gradient_image: Path) -> None:
+    """
+    Test that constant data sets have zero correlation coefficient.
+
+    Design decision: By design, blue channel is constant for gradient
+    images, therefore correlation coefficient in blue channel is zero.
+    """
+    metrics = ImageMetrics(str(gradient_image))
+
+    corr_hb = metrics.correlation(ImageMetrics.RGB.BLUE, "horizontal")
+    corr_vb = metrics.correlation(ImageMetrics.RGB.BLUE, "vertical")
+    corr_db = metrics.correlation(ImageMetrics.RGB.BLUE, "diagonal")
+
+    # Blue channel in gradient image should have a negligible correlation
+    assert_correlation_type(corr_hb, "zero")
+    assert_correlation_type(corr_vb, "zero")
+    assert_correlation_type(corr_db, "zero")
 
 
 def test_correlation_different_directions(gradient_image: Path) -> None:
@@ -371,7 +398,7 @@ def test_plot_generation_no_crash(uniform_random_image: Path, tmp_path: Path) ->
 
 
 # ============================================================================
-# 8. Edge Cases - Week 2
+# 8. Edge Cases
 # ============================================================================
 
 
@@ -384,13 +411,25 @@ def test_correlation_with_small_lag(gradient_image: Path) -> None:
     """
     metrics = ImageMetrics(str(gradient_image))
 
-    # Test different lags
+    # Test default lag
     corr_lag1 = metrics.correlation(ImageMetrics.RGB.ALL, "horizontal", lag=1)
-    corr_lag2 = metrics.correlation(ImageMetrics.RGB.ALL, "horizontal", lag=2)
+    corr_ALL = metrics.correlation(ImageMetrics.RGB.ALL, "horizontal")
+    # Test lag=3 coincidence with red channel
+    corrh_lag3 = metrics.correlation(ImageMetrics.RGB.ALL, "horizontal", lag=3)
+    corrh_RED = metrics.correlation(ImageMetrics.RGB.RED, "horizontal")
+    # Test lag inequality; red vertical correlation > All verical correlation
+    corrv_lag2 = metrics.correlation(ImageMetrics.RGB.ALL, "vertical", lag=2)
+    corrv_RED2 = metrics.correlation(ImageMetrics.RGB.RED, "vertical", lag=2)
 
-    # Both should be high for gradient, but might differ slightly
-    assert abs(corr_lag1) > 0.5, "Lag 1 should show correlation"
-    assert abs(corr_lag2) > 0.3, "Lag 2 should show some correlation"
+    # The following properties must follow
+    assert corr_lag1 == corr_ALL, "Lag 1 should should be the default"
+    assert corrh_lag3 == corrh_RED, (
+        "Lag 3 horizontal should coincide with horizontal correlation on red channel"
+    )
+    assert corrv_lag2 < corrv_RED2, (
+        "For all lags, vertical correlation on ALL channel should be smaller than vertical "
+        "correlation on red channel"
+    )
 
 
 def test_correlation_invalid_direction(uniform_random_image: Path) -> None:
