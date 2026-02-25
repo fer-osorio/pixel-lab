@@ -115,10 +115,10 @@ def gradient_image(temp_image_path: Path) -> Path:
     Generate a gradient image for testing correlation metrics.
 
     This image should show high spatial correlation:
-    - Moderate entropy (≈ 7.0)
-    - High horizontal correlation (> 0.5)
-    - High vertical correlation (> 0.5)
-    - High diagonal correlation (> 0.5)
+    - Ideal entropy (8.0) for RED and GREEN, zero for BLUE and moderate (≈ 7.0) for ALL.
+    - High horizontal correlation (nearly 1.0) for READ and GREEN, zero for BLUE and low (≈ 0.25) for ALL
+    - High vertical correlation (nearly 1.0) for READ and GREEN, zero for BLUE and low (≈ 0.25) for ALL
+    - High diagonal correlation (nearly 1.0) for READ and GREEN, zero for BLUE and low (≈ 0.25) for ALL
 
     Design decision: Use 256x256 to get full byte value range (0-255)
     in both dimensions, creating smooth gradients.
@@ -226,18 +226,22 @@ def assert_entropy_in_range(
 
 def assert_correlation_type(correlation: float, correlation_type: str) -> None:
     """
-    Assert correlation matches expected type (high, low, or zero).
+    Assert correlation matches expected type (one, high, low, or zero).
 
     Args:
         correlation: computed correlation coefficient
-        correlation_type: 'high' (>0.5), 'low' (<0.3), or 'zero' (<0.1)
+        correlation_type: 'one' (>0.9), 'high' (>0.5), 'low' (<0.3), or 'zero' (<0.1)
 
     Design decision: Use qualitative categories rather than exact thresholds
     since correlation values can vary slightly with different images.
     """
     abs_corr = abs(correlation)
 
-    if correlation_type == "high":
+    if correlation_type == "one":
+        assert abs_corr > 0.9, (
+            f"Expected practically perfect correlation (>0.9), got {correlation:.4f}"
+        )
+    elif correlation_type == "high":
         assert abs_corr > 0.5, (
             f"Expected high correlation (>0.5), got {correlation:.4f}"
         )
